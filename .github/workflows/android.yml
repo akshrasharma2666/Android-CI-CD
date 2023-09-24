@@ -1,0 +1,37 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Build with Gradle
+      run: ./gradlew build
+
+    - name: Copy build artifacts to current directory
+      run: |
+        cp app/build/outputs/apk/release/app-release-unsigned.apk .
+
+    - name: Publish build dev artifacts
+      uses: actions/upload-artifact@v2
+      with:
+       name: main dev artifacts
+       path: |
+          app-release-unsigned.apk
